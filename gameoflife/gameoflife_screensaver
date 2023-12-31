@@ -1,0 +1,15 @@
+#!/bin/sh
+FILES="${FILES:-samples}"
+MAX_ITERATIONS="${MAX_ITERATIONS:-infinity}"
+
+set -e
+# Run a cool default
+"$(dirname "$0")"/gameoflife.py \
+  --pretty --color on --delay 0.07 --glider --iterations "$MAX_ITERATIONS" $@
+
+for file in $(find "$FILES" -type f -iname *.txt); do
+  "$(dirname "$0")"/gameoflife.py \
+    --pretty --color on --delay 0.07 \
+    --file "$file" --expand-to-size --iterations "$MAX_ITERATIONS" \
+    $@
+done
