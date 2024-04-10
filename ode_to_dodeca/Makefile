@@ -1,13 +1,13 @@
 CC = g++
 CFLAGS = -Wall
-PROG = cube
+PROG = cube.bin
 
 SRCS = main.cpp imageloader.cpp
 
 ifeq ($(shell uname),Darwin)
 	LIBS = -framework OpenGL -framework GLUT
 else
-	LIBS = -lglut -lGLU
+	LIBS = -lGL -lGLU -lGLEW -lglut
 endif
 
 all: $(PROG)

@@ -37,11 +37,12 @@
 
 using namespace std;
 
-const float BOX_SIZE = 1.0f; //The length of each side of the cube
-float _angle = 0;            //The rotation of the box
+const float BOX_SIZE = 0.50f; //The length of each side of the cube
+float _angle = 95.0;            //The rotation of the box
 GLuint _textureId;           //The OpenGL id of the texture
 
 void handleKeypress(unsigned char key, int x, int y) {
+	printf("keypress at x=%d y=%d key=%u %c\n", x, y, key, key);
 	switch (key) {
 		case 27: //Escape key
 			exit(0);
@@ -49,7 +50,7 @@ void handleKeypress(unsigned char key, int x, int y) {
 }
 
 //Makes the image into a texture, and returns the id of the texture
-GLuint loadTexture(Image* image) {
+GLuint loadTexture(const Image* image) {
 	GLuint textureId;
 	glGenTextures(1, &textureId);
 	glBindTexture(GL_TEXTURE_2D, textureId);
@@ -71,24 +72,30 @@ void initRendering() {
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_COLOR_MATERIAL);
 	
-	Image* image = loadBMP("vtr.bmp");
-	_textureId = loadTexture(image);
-	delete image;
+	Image image;
+	loadBMP("vtr.bmp", &image);
+	_textureId = loadTexture(&image);
+	free(image.pixels);
 }
 
 void handleResize(int w, int h) {
-	glViewport(0, 0, w, h);
+	printf("Resize w=%d h=%d\n", w, h);
+	glViewport(-.5, .5, w, h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45.0, (float)w / (float)h, 1.0, 200.0);
 }
 
-void drawColorCube(float angle, float x, float y) {
+void drawColorCube(float angle, float x, float y, float z) {
+	// printf("%f %f %f\n", angle, x, y, z);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
-	glTranslatef(x, y, 1.0f);
-	glRotatef(-angle, 1.0f, 1.0f, 0.0f);
+	// angle Specifies the angle of rotation, in degrees. 
+	// x, y, z Specify the x, y, and z coordinates of a vector, respectively. 
+	glRotatef(275, .5, .5, .5);
+	glTranslatef(x, y, z);
+	glRotatef(_angle, 0, 0, 0);
 	
 	glBegin(GL_QUADS);
 	
@@ -164,6 +171,7 @@ void drawColorCube(float angle, float x, float y) {
 }
 
 void drawScene() {
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	GLfloat ambientLight[] = {0.3f, 0.3f, 0.3f, 1.0f};
@@ -174,18 +182,21 @@ void drawScene() {
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 	
-        drawColorCube(-0.0f, 0.0f, _angle);
-        drawColorCube(0.0f, 0.0f, -_angle);
+	for (float i = -1; i < 1; i += 0.1) {
+        drawColorCube(_angle, i, 0, 0);
+        drawColorCube(_angle, 0, i, 0);
+        drawColorCube(_angle, 0, 0, i - 1);
+    }
 }
 
 //Called every 25 milliseconds
 void update(int value) {
-	_angle += 1.0f;
+	_angle += 1.5f;
 	if (_angle > 360) {
 		_angle -= 360;
 	}
 	glutPostRedisplay();
-	glutTimerFunc(25, update, 0);
+	glutTimerFunc(5, update, 0);
 }
 
 int main(int argc, char** argv) {
@@ -201,9 +212,10 @@ int main(int argc, char** argv) {
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(400, 400);
 	
-	glutCreateWindow("so fresh");
+	glutCreateWindow("so fresh 2024");
 	initRendering();
 	
+	drawScene();
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(handleKeypress);
 	glutReshapeFunc(handleResize);
