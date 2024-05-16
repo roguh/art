@@ -1,0 +1,7 @@
+*.json
+*.txt
+*.org
+*.svg
+*.eps
+*.png
+__pycache__
