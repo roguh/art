@@ -1,17 +1,28 @@
 #!/bin/sh
+DELAY=0.02
 FILES="${FILES:-samples}"
-MAX_ITERATIONS="${MAX_ITERATIONS:-100}"
+MAX_ITERATIONS="${MAX_ITERATIONS:-300}"
 
-set -e
-# Run a cool default first
-# "$(dirname "$0")"/gameoflife.py \
-#   --pretty --color on --delay 0.07 --glider --iterations "$MAX_ITERATIONS" $@
+# Allow the user to skip to next by pressing Ctrl-C
+# set -e
 
 while true; do
-for file in $(find "$FILES" -type f -iname *.txt | shuf); do
+  # Shuffle file order each loop
+  for file in $(find "$FILES" -type f -iname *.txt | shuf); do
+    "$(dirname "$0")"/gameoflife.py \
+      --file "$file" \
+      --pretty --color on --delay "$DELAY" \
+      --expand-to-size \
+      --iterations "$MAX_ITERATIONS" \
+      $@
+  done
   "$(dirname "$0")"/gameoflife.py \
-    --pretty --color on --delay 0.07 \
-    --file "$file" --expand-to-size --iterations "$MAX_ITERATIONS" \
+    --random \
+    --pretty --color on --delay "$DELAY" \
+    --expand-to-size \
+    --iterations "$MAX_ITERATIONS" \
     $@
-done
+
+  # Give the user a chance to exit the while loop
+  sleep 1 || exit 0
 done

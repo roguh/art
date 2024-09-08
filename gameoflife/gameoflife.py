@@ -3,6 +3,7 @@
 import abc
 import argparse
 import os
+import random
 import string
 import subprocess
 import sys
@@ -31,6 +32,7 @@ class OutputArgs(TypedDict, total=False):
     source: str
     name: str
     delay: float
+    start_delay: float
     pretty: bool
     narrow: bool
     color: str
@@ -315,8 +317,9 @@ def loop(
         display = CLI().display
 
     iteration = 0
-    if max_iterations == 0:
+    if max_iterations == 0 or args.get("start_delay", 0) > 0:
         display(board, iteration, args)
+        time.sleep(args.get("start_delay", 0))
 
     update_function = pick_updater(args.get("source", "unknown"), surface)
 
@@ -347,6 +350,12 @@ def make_init_board(args) -> Board:
             if args.expand_to_size:
                 return add(empty(width, height), init_board)
             return init_board
+    if args.random_board:
+        board = empty(width, height)
+        for y in range(height):
+            for x in range(width):
+                board[y][x] = random.choice([LIVE, DEAD, DEAD])
+        return board
     if args.glider_board:
         if width > height:
             width = height * (width // height)
@@ -371,6 +380,7 @@ def main() -> None:
     )
     parser.add_argument("--iterations", "-i", type=float, default=float("inf"))
     parser.add_argument("--delay", "-d", type=float, default=0.03)
+    parser.add_argument("--start-delay", type=float, default=1)
     parser.add_argument(
         "--surface",
         "-s",
@@ -414,6 +424,7 @@ def main() -> None:
     )
     board_input.add_argument("BOARD", nargs="?")
     board_input.add_argument("--empty-board", action="store_true")
+    board_input.add_argument("--random-board", action="store_true")
     board_input.add_argument("--glider-board", action="store_true")
 
     args = parser.parse_args()
@@ -421,9 +432,10 @@ def main() -> None:
     init_board = make_init_board(args)
 
     output_args: OutputArgs = {
-        "name": "gliders" if args.glider_board else os.path.basename(args.file),
+        "name": "gliders" if args.glider_board else "random" if args.random_board else os.path.basename(args.file),
         "source": args.source,
         "delay": float(args.delay),
+        "start_delay": float(args.start_delay),
         "pretty": bool(args.pretty),
         "narrow": bool(args.narrow),
         "color": "dynamic" if args.color == "on" else args.color,
