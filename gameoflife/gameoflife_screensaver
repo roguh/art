@@ -1,6 +1,7 @@
 #!/bin/sh
-DELAY=0.02
-FILES="${FILES:-samples}"
+BASE="$(dirname "$0")"
+DELAY="${DELAY:-0.02}"
+FILES="${FILES:-$BASE/samples}"
 MAX_ITERATIONS="${MAX_ITERATIONS:-300}"
 
 # Allow the user to skip to next by pressing Ctrl-C
@@ -9,14 +10,14 @@ MAX_ITERATIONS="${MAX_ITERATIONS:-300}"
 while true; do
   # Shuffle file order each loop
   for file in $(find "$FILES" -type f -iname *.txt | shuf); do
-    "$(dirname "$0")"/gameoflife.py \
+    "$BASE/gameoflife.py" \
       --file "$file" \
       --pretty --color on --delay "$DELAY" \
       --expand-to-size \
       --iterations "$MAX_ITERATIONS" \
       $@
   done
-  "$(dirname "$0")"/gameoflife.py \
+  "$BASE/gameoflife.py" \
     --random \
     --pretty --color on --delay "$DELAY" \
     --expand-to-size \

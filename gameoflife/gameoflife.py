@@ -137,9 +137,11 @@ def update(board: Board, surface: Surface) -> Board:
         new_row = empty_row()
         for x, cell in enumerate(row):
             neighbor_count = neighbors(x, row, prev_row, next_row, surface)
-            new_row.append(
-                LIVE if neighbor_count == 3 else cell if neighbor_count == 2 else DEAD
-            )
+            # "normal" RULE B3/S23
+            new_cell = LIVE if neighbor_count == 3 else cell if neighbor_count == 2 else DEAD
+            # RULE B3/S12345
+            # new_cell = LIVE if neighbor_count == 3 else cell if neighbor_count in [1, 2, 3, 4, 5] else DEAD
+            new_row.append(new_cell)
         new_board.append(new_row)
         prev_row = row
     return new_board
