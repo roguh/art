@@ -1,0 +1,6 @@
+[package]
+name = "actually_an_exact_copy_of_galaga"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
